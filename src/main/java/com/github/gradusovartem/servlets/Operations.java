@@ -1,6 +1,7 @@
 package com.github.gradusovartem.servlets;
 
 import com.github.gradusovartem.entities.Operation;
+import com.github.gradusovartem.listeners.OperationListener;
 import com.github.gradusovartem.model.Model;
 
 import javax.servlet.http.HttpServlet;
@@ -34,41 +35,48 @@ public class Operations extends HttpServlet {
      * throws IOException
      */
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        try
+        {
+            int requestCount = OperationListener.getRequestCount();
+            // ввод данных
+            int id = Integer.parseInt(request.getParameter("id"));
+            String comment = request.getParameter("comment");
+            int oper_1 = Integer.parseInt(request.getParameter("oper_1"));
+            int oper_2 = Integer.parseInt(request.getParameter("oper_2"));
+            String operationS = request.getParameter("operation");
+            int result = calculation(oper_1, oper_2, operationS);
 
-        // ввод данных
-        int id = Integer.parseInt(request.getParameter("id"));
-        String comment = request.getParameter("comment");
-        int oper_1 = Integer.parseInt(request.getParameter("oper_1"));
-        int oper_2 = Integer.parseInt(request.getParameter("oper_2"));
-        String operationS = request.getParameter("operation");
-        int result = calculation(oper_1, oper_2, operationS);
+            // создание operation
+            Operation operation = new Operation(id, comment, oper_1, oper_2, operationS, result);
 
-        // создание operation
-        Operation operation = new Operation(id, comment, oper_1, oper_2, operationS, result);
+            // создание места
+            Model model = Model.getInstance();
+            model.add(id, comment, oper_1, oper_2, operation.dt_operation, operationS, result);
 
-        // создание места
-        Model model = Model.getInstance();
-        model.add(id, comment, oper_1, oper_2, operation.dt_operation, operationS, result);
+            // формат ответа
+            response.setContentType("json/text");
+            response.setCharacterEncoding("UTF-8");
 
-        // формат ответа
-        response.setContentType("json/text");
-        response.setCharacterEncoding("UTF-8");
+            // инициализация printwriter'а
+            PrintWriter pw = response.getWriter();
 
-        // инициализация printwriter'а
-        PrintWriter pw = response.getWriter();
+            // to json
+            ObjectMapper objectMapper = new ObjectMapper();
 
-        // to json
-        ObjectMapper objectMapper = new ObjectMapper();
+            String jsonText = objectMapper.writeValueAsString(operation);
 
-        String jsonText = objectMapper.writeValueAsString(operation);
-
-        pw.println(jsonText);
+            pw.println(jsonText);
+            pw.println("The number of requests: " + requestCount);
         /* pw.println(id);
         pw.println(comment);
         pw.println(oper_1);
         pw.println(oper_2);
         pw.println(operationS);
         pw.println(result); */
+        }
+        catch(Exception e) {
+            response.getWriter().write("Error");
+        }
     }
 
     /**
