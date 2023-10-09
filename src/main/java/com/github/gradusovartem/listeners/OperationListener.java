@@ -11,7 +11,7 @@ public class OperationListener implements ServletRequestListener {
     private static int requestCount = 0;
 
     /**
-     * метод requestDestroyed() вызывается при завершении обработки запроса
+     * method requestDestroyed() вызывается при завершении обработки запроса
      * @param servletRequestEvent
      */
     @Override
@@ -20,7 +20,7 @@ public class OperationListener implements ServletRequestListener {
     }
 
     /**
-     * метод requestInitialized() вызывается при отправке запроса
+     * method requestInitialized() вызывается при отправке запроса
      * @param servletRequestEvent
      */
     @Override
@@ -29,7 +29,7 @@ public class OperationListener implements ServletRequestListener {
     }
 
     /**
-     * метод getRequestCount() возвращает количество обращений к сервлету
+     * method getRequestCount() возвращает количество обращений к сервлету
      * @return
      */
     public static int getRequestCount() {

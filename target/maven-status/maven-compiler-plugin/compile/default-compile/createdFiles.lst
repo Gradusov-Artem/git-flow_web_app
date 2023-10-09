@@ -2,4 +2,5 @@ com\github\gradusovartem\entities\Operation.class
 com\github\gradusovartem\filters\DivisionByZeroFilter.class
 com\github\gradusovartem\listeners\OperationListener.class
 com\github\gradusovartem\servlets\Operations.class
+com\github\gradusovartem\servlets\Statistics.class
 com\github\gradusovartem\model\Model.class

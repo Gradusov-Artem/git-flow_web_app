@@ -20,7 +20,7 @@ public class Model {
     private Map<Integer, Integer> modelResult;
 
     /**
-     * @method getInstance() - возращает объект типа Model
+     * method getInstance() - возращает объект типа Model
      * @return
      */
     public static Model getInstance() {
@@ -28,7 +28,7 @@ public class Model {
     }
 
     /**
-     * конструктор Model
+     * constructor Model
      */
     private Model() {
         modelId = new ArrayList<>();

@@ -7,9 +7,10 @@ import com.github.gradusovartem.model.Model;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 
 /**
  * class Operations привязан к url: /operations
@@ -37,13 +38,16 @@ public class Operations extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try
         {
-            int requestCount = OperationListener.getRequestCount();
-            // ввод данных
-            int id = Integer.parseInt(request.getParameter("id"));
-            String comment = request.getParameter("comment");
-            int oper_1 = Integer.parseInt(request.getParameter("oper_1"));
-            int oper_2 = Integer.parseInt(request.getParameter("oper_2"));
-            String operationS = request.getParameter("operation");
+            String jsonString = (String) request.getAttribute("json");
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            Operation data = objectMapper.readValue(jsonString, Operation.class);
+
+            int id = data.getId();
+            String comment = data.getComment();
+            int oper_1 = data.getOper_1();
+            int oper_2 = data.getOper_2();
+            String operationS = data.getOperation();
             int result = calculation(oper_1, oper_2, operationS);
 
             // создание operation
@@ -57,25 +61,17 @@ public class Operations extends HttpServlet {
             response.setContentType("json/text");
             response.setCharacterEncoding("UTF-8");
 
-            // инициализация printwriter'а
             PrintWriter pw = response.getWriter();
 
             // to json
-            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper = new ObjectMapper();
 
             String jsonText = objectMapper.writeValueAsString(operation);
 
             pw.println(jsonText);
-            pw.println("The number of requests: " + requestCount);
-        /* pw.println(id);
-        pw.println(comment);
-        pw.println(oper_1);
-        pw.println(oper_2);
-        pw.println(operationS);
-        pw.println(result); */
         }
         catch(Exception e) {
-            response.getWriter().write("Error");
+            response.getWriter().write("Error" + e.getMessage());
         }
     }
 
@@ -86,7 +82,7 @@ public class Operations extends HttpServlet {
      * @param operation - операция
      * @return - возвращает результат
      */
-    private int calculation(int oper_1, int oper_2, String operation) {
+    public static int calculation(int oper_1, int oper_2, String operation) {
         int result = 0;
 
         if (operation.equals("+")) {
