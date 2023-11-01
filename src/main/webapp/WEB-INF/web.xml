@@ -25,6 +25,16 @@
     <url-pattern>/statistics</url-pattern>
   </servlet-mapping>
 
+  <servlet>
+    <servlet-name>openapi</servlet-name>
+    <servlet-class>com.github.gradusovartem.servlets.Swagger</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>openapi</servlet-name>
+    <url-pattern>/openapi</url-pattern>
+  </servlet-mapping>
+
   <listener>
     <listener-class>com.github.gradusovartem.listeners.OperationListener</listener-class>
   </listener>

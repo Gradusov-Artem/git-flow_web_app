@@ -26,13 +26,12 @@ public class Statistics extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         int requestCount = OperationListener.getRequestCount();
 
-        response.setContentType("json/text");
-        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json");
+        // response.setCharacterEncoding("UTF-8");
 
         String str = "{ \"total_count\": " + requestCount + " }";
-        JSONObject jsonObject = new JSONObject(str);
 
         PrintWriter pw = response.getWriter();
-        pw.println(jsonObject);
+        pw.println(str);
     }
 }

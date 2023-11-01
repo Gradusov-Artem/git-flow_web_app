@@ -3,4 +3,6 @@ D:\java\курсы\calculator_by_swagger\src\main\java\com\github\gradusovartem\servl
 D:\java\курсы\calculator_by_swagger\src\main\java\com\github\gradusovartem\filters\DivisionByZeroFilter.java
 D:\java\курсы\calculator_by_swagger\src\main\java\com\github\gradusovartem\entities\Operation.java
 D:\java\курсы\calculator_by_swagger\src\main\java\com\github\gradusovartem\servlets\Operations.java
+D:\java\курсы\calculator_by_swagger\src\main\java\com\github\gradusovartem\servlets\Swagger.java
+D:\java\курсы\calculator_by_swagger\src\main\java\com\github\gradusovartem\wrapper\JsonRequestWrapper.java
 D:\java\курсы\calculator_by_swagger\src\main\java\com\github\gradusovartem\model\Model.java

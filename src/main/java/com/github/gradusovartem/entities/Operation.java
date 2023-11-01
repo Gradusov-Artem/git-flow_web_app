@@ -1,16 +1,19 @@
 package com.github.gradusovartem.entities;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 /**
  * class Operation - содержит составляющие операции
  */
 public class Operation {
-    public int id;
-    public String comment;
-    public String dt_operation;
-    public int oper_1;
-    public int oper_2;
-    public String operation;
-    public double result;
+    private int id;
+    private String comment;
+    private String dt_operation;
+    private int oper_1;
+    private int oper_2;
+    private String operation;
+    private double result;
 
     public Operation(){
 
@@ -44,8 +47,12 @@ public class Operation {
      * @return
      */
     private String createData(int id, int oper_1, int oper_2, String operation) {
-        String data = Integer.toString(oper_1) + operation.toString() + Integer.toString(oper_2);
-        return data;
+        LocalDateTime currentDateTime = LocalDateTime.now();
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String formattedDateTime = currentDateTime.format(formatter);
+        // String data = Integer.toString(oper_1) + operation.toString() + Integer.toString(oper_2);
+        return formattedDateTime;
     }
 
     /**
@@ -86,6 +93,10 @@ public class Operation {
      */
     public String getOperation() {
         return operation;
+    }
+
+    public String getDt_operation() {
+        return dt_operation;
     }
 
     /**
