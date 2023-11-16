@@ -1,6 +1,7 @@
 com\github\gradusovartem\listeners\OperationListener.class
 com\github\gradusovartem\servlets\Swagger.class
 com\github\gradusovartem\servlets\Operations.class
+com\github\gradusovartem\wrapper\JsonRequestWrapper$1.class
 com\github\gradusovartem\entities\Operation.class
 com\github\gradusovartem\filters\DivisionByZeroFilter.class
 com\github\gradusovartem\wrapper\JsonRequestWrapper.class

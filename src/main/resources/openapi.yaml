@@ -8,27 +8,6 @@ servers:
 paths:
   /operations:
     post:
-      parameters:
-        - name: filter
-          in: query
-          description: Фильтр для метода Post
-          required: false
-          schema:
-            type: object
-            properties:
-              request:
-                type: object
-                properties:
-                  comment:
-                    type: string
-                  oper_1:
-                    type: integer
-                  oper_2:
-                    type: integer
-                  operation:
-                    type: string
-              response:
-                example: "There is no such element"
       summary: Метод создания нового вычисления
       tags:
         - operations

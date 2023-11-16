@@ -10,12 +10,14 @@ import com.google.gson.Gson;
 import javax.servlet.*;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.stream.Collectors;
 
 /**
  * class DivisionByZeroFilter - фильтр, который проверяет деление на 0
@@ -55,15 +57,17 @@ public class DivisionByZeroFilter implements Filter {
 
         if ("POST".equals(httpMethod)) {
             try {
-                BufferedReader reader = httpRequest.getReader();
+                // HttpServletRequestWrapper wrappedRequest = new HttpServletRequestWrapper((HttpServletRequest) request);
+                BufferedReader reader = request.getReader();
                 StringBuilder jsonBuilder = new StringBuilder();
                 String line;
                 while ((line = reader.readLine()) != null) {
                     jsonBuilder.append(line);
                 }
 
-                String jsonString = jsonBuilder.toString();
+                String jsonString = jsonBuilder.toString(); // wrappedRequest.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
 
+                // Возвращение тела запроса
                 JsonRequestWrapper wrapperRequest = new JsonRequestWrapper((HttpServletRequest) request, jsonString);
 
                 // Преобразование JSON строки в объект Java

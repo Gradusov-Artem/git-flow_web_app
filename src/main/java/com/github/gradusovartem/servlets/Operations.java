@@ -3,11 +3,14 @@ package com.github.gradusovartem.servlets;
 import com.github.gradusovartem.entities.Operation;
 import com.github.gradusovartem.model.Model;
 
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -16,8 +19,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class Operations extends HttpServlet {
 
-    Map<Integer, Operation> modelOper = Model.getInstance().getModelOper();
-    private int index = 0;
+    private static int id = 0;
+    private Model model = Model.getInstance();
     /**
      * method doGet() вызывается при обращении к url: /operations
      * @param request - запрос передаваемый в метод
@@ -29,28 +32,32 @@ public class Operations extends HttpServlet {
         String id = request.getParameter("id");
         response.setContentType("application/json");
         PrintWriter out = response.getWriter();
-        ObjectMapper objectMapper = new ObjectMapper();
 
         if (id == null) {
 
+            ObjectMapper objectMapper = new ObjectMapper();
+
             // Используем ObjectMapper для преобразования Map в JSON
-            String json = objectMapper.writeValueAsString(modelOper);
+            String json = objectMapper.writeValueAsString(model.getValues());
 
             // Выводим JSON в ответ
+            response.setStatus(200);
             out.println(json);
         }
         else {
-            Operation operationById = modelOper.get(Integer.parseInt(id));
+            ObjectMapper objectMapper = new ObjectMapper();
+            Operation operationById = model.getOperationById(Integer.parseInt(id));
 
             if (operationById != null) {
                 // Используем ObjectMapper для преобразования operationById в JSON
                 String json = objectMapper.writeValueAsString(operationById);
 
                 // Выводим JSON в ответ
+                response.setStatus(200);
                 out.println(json);
             }
             else {
-                out.println("There is no such element");
+                response.setStatus(204);
             }
         }
     }
@@ -64,6 +71,9 @@ public class Operations extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try
         {
+            // HttpServletRequestWrapper wrappedRequest = new HttpServletRequestWrapper((HttpServletRequest) request);
+
+            // Считываем данные из тела запроса
             BufferedReader reader = request.getReader();
             StringBuilder jsonBuilder = new StringBuilder();
             String line;
@@ -71,38 +81,39 @@ public class Operations extends HttpServlet {
                 jsonBuilder.append(line);
             }
 
-            String jsonString = jsonBuilder.toString();
+            // Преобразуем json в String
+            String jsonString = jsonBuilder.toString(); // request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
 
+            // Разделяем содержимое
             ObjectMapper objectMapper = new ObjectMapper();
             Operation data = objectMapper.readValue(jsonString, Operation.class);
 
-            index += 1;
-            int id = index;
-            String comment = data.getComment();
-            int oper_1 = data.getOper_1();
-            int oper_2 = data.getOper_2();
-            String operationS = data.getOperation();
-            int result = calculation(oper_1, oper_2, operationS);
+            // Создаем содержимое operation
+            id = getId();
+            int result = calculation(data);
+            data.setId(id);
+            data.setResult(result);
 
-            // создание operation
-            Operation operation = new Operation(id, comment, oper_1, oper_2, operationS, result);
+            // Создание operation
+            Operation operation = new Operation(data);
 
-            // создание места
+            // Создание места
             Model model = Model.getInstance();
-            model.add(id, operation);
+            model.add(operation);
 
-            // формат ответа
+            // Формат ответа
             response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
 
             PrintWriter pw = response.getWriter();
 
             String jsonText = objectMapper.writeValueAsString(operation);
 
+            response.setStatus(200);
             pw.println(jsonText);
         }
         catch(Exception e) {
             response.getWriter().write("Error" + e.getMessage());
+            response.setStatus(500);
         }
     }
 
@@ -114,28 +125,39 @@ public class Operations extends HttpServlet {
      */
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String id = request.getParameter("id");
-        response.setContentType("application/json");
-        PrintWriter out = response.getWriter();
-        ObjectMapper objectMapper = new ObjectMapper();
 
         if (id != null) {
-            BufferedReader reader = request.getReader();
-            StringBuilder jsonBuilder = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                jsonBuilder.append(line);
+            if (model.getOperationById(Integer.parseInt(id)) != null) {
+                response.setContentType("application/json");
+                PrintWriter out = response.getWriter();
+                ObjectMapper objectMapper = new ObjectMapper();
+
+                BufferedReader reader = request.getReader();
+                StringBuilder jsonBuilder = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    jsonBuilder.append(line);
+                }
+                String jsonString = jsonBuilder.toString();
+
+                Operation data = objectMapper.readValue(jsonString, Operation.class);
+                String comment = data.getComment();
+
+                Operation operation = model.getOperationById(Integer.parseInt(id));
+                operation.setComment(comment);
+
+                String jsonText = objectMapper.writeValueAsString(operation);
+
+                response.setStatus(200);
+                out.println(jsonText);
             }
-            String jsonString = jsonBuilder.toString();
 
-            Operation data = objectMapper.readValue(jsonString, Operation.class);
-            String comment = data.getComment();
-
-            Operation operation = modelOper.get(Integer.parseInt(id));
-            operation.setComment(comment);
-
-            String jsonText = objectMapper.writeValueAsString(operation);
-
-            out.println(jsonText);
+            else {
+                response.setStatus(204);
+            }
+        }
+        else {
+            response.setStatus(204);
         }
     }
 
@@ -148,21 +170,28 @@ public class Operations extends HttpServlet {
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String id = request.getParameter("id");
-        response.setContentType("application/json");
-        PrintWriter out = response.getWriter();
-        ObjectMapper objectMapper = new ObjectMapper();
 
         if (id != null) {
-            Operation operationById = modelOper.remove(Integer.parseInt(id));
+            if (model.getOperationById(Integer.parseInt(id)) != null) {
+                response.setContentType("application/json");
+                PrintWriter out = response.getWriter();
+                ObjectMapper objectMapper = new ObjectMapper();
 
-            // Используем ObjectMapper для преобразования operationById в JSON
-            String json = objectMapper.writeValueAsString(operationById);
+                Operation operationById = model.removeById(Integer.parseInt(id));
 
-            // Выводим JSON в ответ
-            out.println(json);
+                // Используем ObjectMapper для преобразования operationById в JSON
+                String json = objectMapper.writeValueAsString(operationById);
+
+                // Выводим JSON в ответ
+                response.setStatus(200);
+                out.println(json);
+            }
+            else {
+                response.setStatus(204);
+            }
         }
         else {
-            out.println("You didn't choose the number of operation to delete.");
+            response.setStatus(204);
         }
 
     }
@@ -174,25 +203,29 @@ public class Operations extends HttpServlet {
      * @param operation - операция
      * @return - возвращает результат
      */
-    public static int calculation(int oper_1, int oper_2, String operation) {
+    private static int calculation(Operation data) {
         int result = 0;
 
-        if (operation.equals("+")) {
-            result = oper_1 + oper_2;
+        if (data.getOperation().equals("+")) {
+            result = data.getOper_1() + data.getOper_2();
         }
 
-        if (operation.equals("-")) {
-            result = oper_1 - oper_2;
+        if (data.getOperation().equals("-")) {
+            result = data.getOper_1() - data.getOper_2();
         }
 
-        if (operation.equals("*")) {
-            result = oper_1 * oper_2;
+        if (data.getOperation().equals("*")) {
+            result = data.getOper_1() * data.getOper_2();
         }
 
-        if (operation.equals("/")) {
-            result = oper_1 / oper_2;
+        if (data.getOperation().equals("/")) {
+            result = data.getOper_1() / data.getOper_2();
         }
 
         return result;
+    }
+
+    private int getId() {
+        return id + 1;
     }
 }

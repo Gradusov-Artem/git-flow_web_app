@@ -2,10 +2,7 @@ package com.github.gradusovartem.model;
 
 import com.github.gradusovartem.entities.Operation;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * class Model - хранит данные об операциях
@@ -29,28 +26,33 @@ public class Model {
     private Model() {
         modelOper = new HashMap<>();
     }
-
-    public Model(int id, Operation operation) {
+    /* public Model(int id, Operation operation) {
         modelOper.put(id, operation);
-    }
+    } */
 
     /**
      * method add() - метод который добавляет составляющие операции в коллекции
      */
-    public void add(int id, Operation operation) {
-        modelOper.put(id, operation);
+    public void add(Operation operation) {
+        modelOper.put(operation.getId(), operation);
     }
 
-    public Map<Integer, Operation> getModelOper() {
+    /* private Map<Integer, Operation> getModelOper() {
         return modelOper;
-    }
+    } */
 
     public Operation getOperationById(int id) {
         Operation operationById = modelOper.get(id);
         return operationById;
     }
 
-    public void deleteById(int id) {
+    public Operation removeById(int id) {
+        Operation operationById = getOperationById(id);
         modelOper.remove(id, getOperationById(id));
+        return operationById;
+    }
+    public Collection<Operation> getValues() {
+        Collection<Operation> values = modelOper.values();
+        return values;
     }
 }

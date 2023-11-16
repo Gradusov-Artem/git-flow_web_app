@@ -8,6 +8,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,21 +29,15 @@ public class Swagger extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        // Установка типа содержимого как JSON
-        response.setContentType("application/json");
+        response.setContentType("application/x-yaml");
+        response.setCharacterEncoding("UTF-8");
 
-        // Чтение файла OpenAPI (замените "path/to/openapi.json" на путь к вашему файлу)
-        Map<String, Object> openAPIFileContent = readFileOpenAPI("src/main/resources/openapi.yaml");
+        /* Map<String, Object> */ String openAPIFileContent = readFileOpenAPI("src/main/resources/openapi.yaml");
 
         PrintWriter out = response.getWriter();
-        ObjectMapper objectMapper = new ObjectMapper();
 
-        // Используем ObjectMapper для преобразования Map в JSON
-        String json = objectMapper.writeValueAsString(openAPIFileContent);
-
-        // Выводим JSON в ответ
-        out.println(json);
-        // response.getWriter().write(openAPIFileContent);
+        // Выводим openAPIFileContent
+        out.println(openAPIFileContent);
     }
 
     /**
@@ -48,16 +45,8 @@ public class Swagger extends HttpServlet {
      * @param filePath
      * @return
      */
-    private Map<String, Object> readFileOpenAPI(String filePath) {
-        Yaml yaml = new Yaml();
-        Map<String, Object> data = null;
-
-        try (InputStream input = new FileInputStream(filePath)) {
-            // Читаем YAML и преобразуем его в Map
-            data = yaml.load(input);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return data;
+    private String readFileOpenAPI(String filePath) throws IOException {
+        String yaml = new String(Files.readAllBytes(Paths.get(filePath)), StandardCharsets.UTF_8);
+        return yaml;
     }
 }
