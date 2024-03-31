@@ -7,17 +7,17 @@
 
   <servlet>
     <servlet-name>operations</servlet-name>
-    <servlet-class>com.github.gradusovartem.servlets.Operations</servlet-class>
+    <servlet-class>com.github.gradusovartem.servlets.OperationServlet</servlet-class>
   </servlet>
 
   <servlet-mapping>
     <servlet-name>operations</servlet-name>
-    <url-pattern>/operations</url-pattern>
+    <url-pattern>/operations/*</url-pattern>
   </servlet-mapping>
 
   <servlet>
     <servlet-name>statistics</servlet-name>
-    <servlet-class>com.github.gradusovartem.servlets.Statistics</servlet-class>
+    <servlet-class>com.github.gradusovartem.servlets.StatisticsServlet</servlet-class>
   </servlet>
 
   <servlet-mapping>
@@ -27,7 +27,7 @@
 
   <servlet>
     <servlet-name>openapi</servlet-name>
-    <servlet-class>com.github.gradusovartem.servlets.Swagger</servlet-class>
+    <servlet-class>com.github.gradusovartem.servlets.SwaggerServlet</servlet-class>
   </servlet>
 
   <servlet-mapping>

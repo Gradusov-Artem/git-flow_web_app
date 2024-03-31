@@ -1,28 +1,31 @@
 package com.github.gradusovartem.filters;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.github.gradusovartem.entities.Operation;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import com.github.gradusovartem.wrapper.JsonRequestWrapper;
-import com.google.gson.Gson;
+import com.github.gradusovartem.entities.SingleObjectMapper;
+import com.github.gradusovartem.wrapper.RequestWrapper;
 
 import javax.servlet.*;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.stream.Collectors;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * class DivisionByZeroFilter - фильтр, который проверяет деление на 0
  */
 public class DivisionByZeroFilter implements Filter {
+
+    ObjectMapper objectMapper = SingleObjectMapper.getInstance();
 
     /**
      * method init - вызывается при вызове фильтра
@@ -47,52 +50,87 @@ public class DivisionByZeroFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         String httpMethod = httpRequest.getMethod();
 
-        // HttpServletRequest request = (HttpServletRequest) servletRequestEvent.getServletRequest();
-        String requestURL = ((HttpServletRequest) request).getRequestURL().toString();
-        URL url = new URL(requestURL);
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestProperty("Content-Type", "application/json; utf-8");
-        con.setRequestProperty("Accept", "application/json");
-        con.setDoOutput(true);
-
-        if ("POST".equals(httpMethod)) {
-            try {
-                // HttpServletRequestWrapper wrappedRequest = new HttpServletRequestWrapper((HttpServletRequest) request);
-                BufferedReader reader = request.getReader();
-                StringBuilder jsonBuilder = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    jsonBuilder.append(line);
-                }
-
-                String jsonString = jsonBuilder.toString(); // wrappedRequest.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
-
-                // Возвращение тела запроса
-                JsonRequestWrapper wrapperRequest = new JsonRequestWrapper((HttpServletRequest) request, jsonString);
-
-                // Преобразование JSON строки в объект Java
-                ObjectMapper objectMapper = new ObjectMapper();
-                Operation data = objectMapper.readValue(jsonString, Operation.class);
-
-                int oper_2 = data.getOper_2();
-                String operation = data.getOperation();
-
-                if (oper_2 == 0 && operation.equals("/")) {
-                    response.getWriter().write("Division by zero.");
-                    HttpServletResponse resp = (HttpServletResponse) response;
-                    resp.setStatus(400);
-                }
-                else {
-                    chain.doFilter(wrapperRequest, response);
-                }
-            } catch (NumberFormatException e) {
-                response.getWriter().write("Incorrect values.");
-            }
-        }
-
-        else {
+        if (!("POST".equals(httpMethod))) {
             chain.doFilter(request, response);
+            return;
         }
+        Operation data = null;
+
+        // Возвращение тела запроса
+        RequestWrapper wrapperRequest = new RequestWrapper((HttpServletRequest) request);
+
+        try {
+            byte[] bytes = new byte[wrapperRequest.getContentLength()];
+            wrapperRequest.getInputStream().read(bytes, 0, bytes.length);
+            data = objectMapper.readValue(bytes, Operation.class);
+        }
+        // Проверка на правильно указанные данные
+        catch (NullPointerException e) {
+            decorateResponse((HttpServletResponse) response, "Please check, whether the input data is correct and meet all requirement:\ncomment - String type\noper_1 - Integer type\noper_2 - Integer type" +
+                    "\noperation - String type", 400);
+            return;
+        }
+        // Обработка исключение при вводе неправильных данных
+        catch (JsonParseException e) {
+            decorateResponse((HttpServletResponse) response, "Please check, whether the input data is correct and meet all requirement:\ncomment - String type\noper_1 - Integer type\noper_2 - Integer type" +
+                    "\noperation - String type", 400);
+            return;
+        }
+        // Проверка на правильно введенный тип данных
+        catch (InvalidFormatException e) {
+            decorateResponse((HttpServletResponse) response, "Some issues with format. Please check the input data.", 400);
+            return;
+        }
+        // Общая проверка исключений
+        catch (Exception e) {
+            decorateResponse((HttpServletResponse) response, e.getClass().getCanonicalName() + "\nIncorrect values.", 400);
+            return;
+        }
+        // Проверка, если в боди нет операции
+        if (data.getOperation() == null) {
+            decorateResponse((HttpServletResponse) response, "Please enter an operation", 400);
+            return;
+        }
+
+        String operation;
+        // Проверка, если в операции вводится не арифметический символ
+        switch (data.getOperation()) {
+            case "+":
+            case "-":
+            case "*":
+            case "/":
+                operation = data.getOperation();
+                break;
+            default:
+                decorateResponse((HttpServletResponse) response, "Please enter an operation symbol", 400);
+                return;
+
+        }
+
+        // Считывание operation и oper_2
+        operation = data.getOperation();
+        int oper_2 = data.getOper_2();
+
+        // Проверка деления на ноль
+        if (oper_2 == 0 && operation.equals("/")) {
+            decorateResponse((HttpServletResponse) response, "Division by zero.", 400);
+        }
+        // Передача запроса по цепочке
+        else {
+            chain.doFilter(wrapperRequest, response);
+        }
+    }
+
+    /**
+     * Метод выводит заданное сообщение и устанавливает статус ответа
+     * @param response
+     * @param message
+     * @param status
+     * @throws IOException
+     */
+    private void decorateResponse(HttpServletResponse response, String message, int status) throws IOException {
+        response.getWriter().println(message);
+        response.setStatus(status);
     }
 
     /**

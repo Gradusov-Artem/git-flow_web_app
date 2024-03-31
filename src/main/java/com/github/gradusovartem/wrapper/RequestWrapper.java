@@ -8,17 +8,18 @@ import java.io.*;
 /**
  * class JsonRequestWrapper возвращает json данные в request
  */
-public class JsonRequestWrapper extends HttpServletRequestWrapper {
-    private String body;
+public class RequestWrapper extends HttpServletRequestWrapper {
+    private byte[] body;
 
     /**
      * constructor JsonRequestWrapper
      * @param request
      * @param body
      */
-    public JsonRequestWrapper(HttpServletRequest request, String body) {
+    public RequestWrapper(HttpServletRequest request) throws IOException {
         super(request);
-        this.body = body;
+        this.body = new byte[request.getContentLength()];
+        request.getInputStream().read(body, 0, body.length);
     }
 
     /**
@@ -38,17 +39,15 @@ public class JsonRequestWrapper extends HttpServletRequestWrapper {
 
     @Override
     public ServletInputStream getInputStream() throws IOException {
-        // Возвращаем ServletInputStream, используя сохраненное тело запроса
-        final byte[] bytes = body.getBytes();
         return new ServletInputStream() {
             private int index = 0;
 
             @Override
             public int read() throws IOException {
-                if (index >= bytes.length) {
+                if (index >= body.length) {
                     return -1;
                 }
-                return bytes[index++];
+                return body[index++];
             }
         };
     }
