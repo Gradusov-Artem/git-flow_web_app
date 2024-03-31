@@ -89,8 +89,6 @@ public class OperationServlet extends HttpServlet {
         try {
             // Считываем данные из тела запроса
             data = objectMapper.readValue(request.getInputStream(), Operation.class); // считывание в data оставить в сервлете или убрать на отдельный уровень
-
-            logger.info("Object with id: " + data.getId() + " created");
         }
         // Проверка на правильно указанные данные
         catch (NullPointerException e) {
@@ -117,6 +115,7 @@ public class OperationServlet extends HttpServlet {
 
         // Добавление операции
         json = objectMapper.writeValueAsString(service.add(data));
+        logger.info("Object with id: " + data.getId() + " created");
 
         // Вывод результата
         if (json.equals("null")) {
