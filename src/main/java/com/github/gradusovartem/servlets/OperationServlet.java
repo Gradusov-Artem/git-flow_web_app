@@ -18,7 +18,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class OperationServlet extends HttpServlet {
     private final Logger logger = LogManager.getFormatterLogger(getClass());
-    private static IService service = new Service();
+    private static Service service = new OperationService();
     ObjectMapper objectMapper = SingleObjectMapper.getInstance();
 
     /**
@@ -60,14 +60,15 @@ public class OperationServlet extends HttpServlet {
             decorateResponse(response, "Something went wrong, please try again", 400);
             return;
         }
-        // Используем ObjectMapper для преобразования operation в JSON
-        String json = objectMapper.writeValueAsString(service.get(Integer.parseInt(id)));
+        Operation operation = service.get(Integer.parseInt(id));
 
         // Если operation равно null, вывести сообщение и установить статус
-        if (json.equals("null")) {
+        if (operation == null) {
             decorateResponse(response, "There is no such operation", 400);
             return;
         }
+        // Используем ObjectMapper для преобразования operation в JSON
+        String json = objectMapper.writeValueAsString(operation);
         // Вывод ответа json
         decorateResponse(response, json, 200);
     }
@@ -84,7 +85,6 @@ public class OperationServlet extends HttpServlet {
         response.setContentType("application/json");
 
         Operation data = null;
-        String json = null;
 
         try {
             // Считываем данные из тела запроса
@@ -114,14 +114,15 @@ public class OperationServlet extends HttpServlet {
         }
 
         // Добавление операции
-        json = objectMapper.writeValueAsString(service.add(data));
+        Operation operation = service.add(data);
         logger.info("Object with id: " + data.getId() + " created");
 
         // Вывод результата
-        if (json.equals("null")) {
+        if (operation == null) {
             decorateResponse(response, "The operation can't be created. Please, check the input data", 400);
             return;
         }
+        String json = objectMapper.writeValueAsString(operation);
         // Вывод ответа json
         decorateResponse(response, json, 200);
     }
@@ -170,14 +171,15 @@ public class OperationServlet extends HttpServlet {
         }
         String comment = data.getComment();
 
-        String json = objectMapper.writeValueAsString(service.update(Integer.parseInt(id), comment));
+        Operation operation = service.update(Integer.parseInt(id), comment);
 
         // Вывод обновленного комментария
-        if (json.equals("null")) {
+        if (operation == null) {
             decorateResponse(response, "There is no such operation", 400);
             return;
         }
 
+        String json = objectMapper.writeValueAsString(operation);
         // Вывод ответа json
         decorateResponse(response, json, 200);
     }
@@ -220,14 +222,15 @@ public class OperationServlet extends HttpServlet {
             decorateResponse(response, "Something went wrong, please try again", 400);
             return;
         }
-        // Используем ObjectMapper для преобразования operationById в JSON
-        String json = objectMapper.writeValueAsString(service.delete(Integer.parseInt(id)));
+        Operation operation = service.delete(Integer.parseInt(id));
 
         // Проверка существование операции
-        if (json.equals("null")) {
+        if (operation == null) {
             decorateResponse(response, "There is no such operation", 400);
             return;
         }
+        // Используем ObjectMapper для преобразования operationById в JSON
+        String json = objectMapper.writeValueAsString(operation);
         // Вывод ответа json
         decorateResponse(response, json, 200);
     }

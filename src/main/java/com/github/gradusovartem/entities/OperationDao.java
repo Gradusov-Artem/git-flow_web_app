@@ -1,37 +1,73 @@
 package com.github.gradusovartem.entities;
 
-import com.github.gradusovartem.model.Model;
-
 import java.util.Collection;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.HashMap;
+import java.util.Map;
 
 public class OperationDao implements Dao<Operation>{
-    private static final AtomicInteger id = new AtomicInteger(0);
-    private Model model = Model.getInstance();
+    // private Model model = Model.getInstance();
+    private Map<Integer, Operation> modelOper;
+    public OperationDao() {
+        modelOper = new HashMap<>();
+    }
 
     @Override
     public Operation get(int id) {
-        return model.getOperationById(id);
+        return getOperationById(id);
     }
 
     @Override
     public Collection<Operation> getAll() {
-        return model.getValues();
+        return getValues();
     }
 
     @Override
-    public void add(Operation operation) {
-        model.add(operation);
+    public boolean add(Operation operation) {
+        addOperation(operation);
+        return true;
     }
 
     @Override
-    public void update(Operation operation, String comment) {
-        operation.setComment(comment);
+    public boolean update(int id, String comment) {
+        // operation.setComment(comment);
+        Operation operation = getOperationById(id);
+        if (operation != null) {
+            operation.setComment(comment);
+            return true;
+        }
+        return false;
     }
 
     @Override
-    public void delete(Operation operation) {
-        model.removeById(operation.getId());
+    public boolean delete(int id) {
+        Operation operation = getOperationById(id);
+        if (operation != null) {
+            removeById(id);
+            return true;
+        }
+        return false;
+    }
+
+    public void addOperation(Operation operation) {
+        modelOper.put(operation.getId(), operation);
+    }
+
+    /* private Map<Integer, Operation> getModelOper() {
+        return modelOper;
+    } */
+
+    public Operation getOperationById(int id) {
+        Operation operationById = modelOper.get(id);
+        return operationById;
+    }
+
+    public Operation removeById(int id) {
+        Operation operationById = getOperationById(id);
+        modelOper.remove(id, getOperationById(id));
+        return operationById;
+    }
+    public Collection<Operation> getValues() {
+        Collection<Operation> values = modelOper.values();
+        return values;
     }
 }

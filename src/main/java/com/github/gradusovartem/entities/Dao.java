@@ -1,7 +1,6 @@
 package com.github.gradusovartem.entities;
 
 import java.util.Collection;
-import java.util.Optional;
 
 /**
  * Класс-шаблон для реализации CRUD-операций
@@ -13,9 +12,9 @@ public interface Dao<T> {
 
     Collection<T> getAll();
 
-    void add(Operation t);
+    boolean add(Operation t);
 
-    void update(Operation t, String params);
+    boolean update(int id, String comment);
 
-    void delete(Operation t);
+    boolean delete(int id);
 }
