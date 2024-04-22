@@ -3,10 +3,18 @@ package com.github.gradusovartem.entities;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Реализует интерфейс Service
+ */
 public class OperationService implements Service {
-    private final AtomicInteger id = new AtomicInteger(0);
-    private Dao<Operation> operationDao = new OperationDao();
+    private final AtomicInteger id = new AtomicInteger(2);
+    private Dao<Operation> operationDao = new OperationDaoDB();
 
+    /**
+     * Метод реализует получение данных по id, вызывая слой Dao
+     * @param id - параметр Integer
+     * @return возвращает объект класса Operation
+     */
     @Override
     public Operation get(int id) {
         Operation currentOperation = operationDao.get(id);
@@ -15,13 +23,22 @@ public class OperationService implements Service {
         return null;
     }
 
+    /**
+     * Метод реализует получение всех данных, вызывая слой Dao
+     * @return коллекцию объектов класса Operation
+     */
     @Override
     public Collection<Operation> getAll() {
         return operationDao.getAll();
     }
 
+    /**
+     * Метод реализует добавление новой операции, вызывая слой Dao
+     * @param operation - параметр Operation
+     * @return возвращает объект класса Operation
+     */
     @Override
-    public Operation add(Operation operation) {
+    public Operation add(Operation operation){
         if (operation.getOperation() == null) {
             return null;
         }
@@ -37,59 +54,83 @@ public class OperationService implements Service {
         }
 
         int result = calculation(operation);
-        operation.setId(generateUniqueID());
+        int id_ = generateUniqueID();
+        operation.setId(id_);
         operation.setResult(result);
         Operation currentOperation = new Operation(operation);
-        operationDao.add(currentOperation);
-        currentOperation = operationDao.get(Integer.parseInt(String.valueOf(id)));
-        return currentOperation;
+        if (operationDao.add(currentOperation)) {
+            currentOperation = operationDao.get(id_);
+            return currentOperation;
+        }
+        return null;
     }
 
+    /**
+     * Метод реализует обновление операции по id, вызывая слой Dao
+     * @param id - параметр Integer
+     * @param comment - параметр String
+     * @return возвращает объект класса Operation
+     */
     @Override
     public Operation update(int id, String comment) {
         Operation currentOperation = operationDao.get(id);
-        if (currentOperation != null) {
-            if (operationDao.update(id, comment)) {
-                currentOperation = operationDao.get(id);
-                return currentOperation;
-            }
+        if (currentOperation == null) {
+            return null;
+        }
+        if (operationDao.update(id, comment)) {
+            currentOperation = operationDao.get(id);
+            return currentOperation;
         }
         return null;
     }
 
+    /**
+     * Метод реализует удаление операции по id, вызывая слой Dao
+     * @param id - параметр Integer
+     * @return возвращает объект класса Operation
+     */
     @Override
     public Operation delete(int id) {
         Operation currentOperation = operationDao.get(id);
-        if (currentOperation != null) {
-            if (operationDao.delete(id)) {
-                return currentOperation;
-            }
+        if (currentOperation == null) {
+            return null;
+        }
+        if (operationDao.delete(id)) {
+            return currentOperation;
         }
         return null;
     }
 
-    private int calculation(Operation data) {
+    /**
+     * Метод реализует вычисление результата
+     * @param operation
+     * @return возвращает объект Integer
+     */
+    private int calculation(Operation operation) {
         int result = 0;
-
-        if (data.getOperation().equals("+")) {
-            result = data.getOper_1() + data.getOper_2();
+        switch (operation.getOperation()) {
+            case "+":
+                result = operation.getOper_1() + operation.getOper_2();
+                break;
+            case "-":
+                result = operation.getOper_1() - operation.getOper_2();
+                break;
+            case "*":
+                result = operation.getOper_1() * operation.getOper_2();
+                break;
+            case "/":
+                result = operation.getOper_1() / operation.getOper_2();
+                break;
+            default:
+                break;
         }
-
-        if (data.getOperation().equals("-")) {
-            result = data.getOper_1() - data.getOper_2();
-        }
-
-        if (data.getOperation().equals("*")) {
-            result = data.getOper_1() * data.getOper_2();
-        }
-
-        if (data.getOperation().equals("/")) {
-            result = data.getOper_1() / data.getOper_2();
-        }
-
         return result;
     }
 
+    /**
+     * Метод реализует создание уникального id
+     * @return возвращает объект Integer
+     */
     private int generateUniqueID() {
         return id.incrementAndGet();
     }

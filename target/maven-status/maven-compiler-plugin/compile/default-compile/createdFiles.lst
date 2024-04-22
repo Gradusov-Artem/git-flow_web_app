@@ -1,8 +1,8 @@
 com\github\gradusovartem\servlets\SwaggerServlet.class
+com\github\gradusovartem\entities\JDBC.class
 com\github\gradusovartem\entities\Service.class
 com\github\gradusovartem\entities\Operation.class
 com\github\gradusovartem\wrapper\RequestWrapper$1.class
-com\github\gradusovartem\model\Model.class
 com\github\gradusovartem\servlets\StatisticsServlet.class
 com\github\gradusovartem\entities\OperationDao.class
 com\github\gradusovartem\listeners\OperationListener.class
@@ -11,4 +11,5 @@ com\github\gradusovartem\wrapper\RequestWrapper.class
 com\github\gradusovartem\entities\OperationService.class
 com\github\gradusovartem\filters\DivisionByZeroFilter.class
 com\github\gradusovartem\entities\SingleObjectMapper.class
+com\github\gradusovartem\entities\OperationDaoDB.class
 com\github\gradusovartem\entities\Dao.class
