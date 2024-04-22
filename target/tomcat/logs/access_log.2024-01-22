@@ -1,7 +1,0 @@
-0:0:0:0:0:0:0:1 - - [22/Jan/2024:12:30:41 +0300] "POST /operations HTTP/1.1" 200 134 http-bio-8080-exec-2 172
-0:0:0:0:0:0:0:1 - - [22/Jan/2024:12:30:51 +0300] "GET /operations/%20 HTTP/1.1" 200 41 http-bio-8080-exec-3 1
-0:0:0:0:0:0:0:1 - - [22/Jan/2024:12:31:01 +0300] "GET /operations/aa HTTP/1.1" 200 41 http-bio-8080-exec-4 1
-0:0:0:0:0:0:0:1 - - [22/Jan/2024:12:31:05 +0300] "GET /operations/ HTTP/1.1" 200 50 http-bio-8080-exec-5 0
-0:0:0:0:0:0:0:1 - - [22/Jan/2024:12:31:10 +0300] "GET /operations/1 HTTP/1.1" 200 134 http-bio-8080-exec-6 1
-0:0:0:0:0:0:0:1 - - [22/Jan/2024:12:31:18 +0300] "GET /operations%20 HTTP/1.1" 404 977 http-bio-8080-exec-7 1
-0:0:0:0:0:0:0:1 - - [22/Jan/2024:12:31:28 +0300] "GET /operations HTTP/1.1" 200 136 http-bio-8080-exec-8 4
