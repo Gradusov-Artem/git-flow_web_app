@@ -1,0 +1,14 @@
+0:0:0:0:0:0:0:1 - - [06/Feb/2024:18:31:04 +0300] "POST /operations HTTP/1.1" 200 38 http-bio-8080-exec-2 22139
+0:0:0:0:0:0:0:1 - - [06/Feb/2024:18:33:12 +0300] "POST /operations HTTP/1.1" 200 134 http-bio-8080-exec-2 227
+0:0:0:0:0:0:0:1 - - [06/Feb/2024:18:33:14 +0300] "POST /operations HTTP/1.1" 200 134 http-bio-8080-exec-3 2
+0:0:0:0:0:0:0:1 - - [06/Feb/2024:18:33:17 +0300] "GET /operations HTTP/1.1" 200 269 http-bio-8080-exec-4 3
+0:0:0:0:0:0:0:1 - - [06/Feb/2024:18:33:22 +0300] "PUT /operations/1 HTTP/1.1" 200 129 http-bio-8080-exec-5 1
+0:0:0:0:0:0:0:1 - - [06/Feb/2024:18:33:25 +0300] "DELETE /operations/1 HTTP/1.1" 200 129 http-bio-8080-exec-6 1
+0:0:0:0:0:0:0:1 - - [06/Feb/2024:18:33:27 +0300] "GET /operations HTTP/1.1" 200 136 http-bio-8080-exec-7 0
+0:0:0:0:0:0:0:1 - - [06/Feb/2024:18:45:56 +0300] "POST /operations HTTP/1.1" 200 34 http-bio-8080-exec-2 105
+0:0:0:0:0:0:0:1 - - [06/Feb/2024:18:47:03 +0300] "POST /operations HTTP/1.1" 200 34 http-bio-8080-exec-2 24564
+0:0:0:0:0:0:0:1 - - [06/Feb/2024:18:48:42 +0300] "POST /operations HTTP/1.1" 200 134 http-bio-8080-exec-2 25690
+0:0:0:0:0:0:0:1 - - [06/Feb/2024:18:49:31 +0300] "POST /operations HTTP/1.1" 200 134 http-bio-8080-exec-2 20613
+0:0:0:0:0:0:0:1 - - [06/Feb/2024:18:49:41 +0300] "POST /operations HTTP/1.1" 200 133 http-bio-8080-exec-3 3244
+0:0:0:0:0:0:0:1 - - [06/Feb/2024:18:49:52 +0300] "POST /operations HTTP/1.1" 200 34 http-bio-8080-exec-4 4624
+0:0:0:0:0:0:0:1 - - [06/Feb/2024:18:49:58 +0300] "GET /operations HTTP/1.1" 200 268 http-bio-8080-exec-5 4
