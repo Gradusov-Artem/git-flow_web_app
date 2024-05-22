@@ -15,7 +15,22 @@ import java.util.Collection;
  * Класс реализует слой Dao для доступа к базе данных
  */
 public class OperationDaoDB implements Dao {
+    private static final String url = "jdbc:postgresql://localhost:5432/OperationDB?user=postgres&password=7719150Artik";
+    private static String getStatement = "SELECT * FROM operations WHERE id = ?";
+    private static String getAllStatement = "SELECT * FROM operations";
+    private static String addStatement = "INSERT INTO operations(id, comment, dt_operation, oper_1, oper_2, operation, result) VALUES(?, ?, ?, ?, ?, ?, ?)";
+    private static String updateStatement = "UPDATE operations SET comment = ? WHERE id = ?";
+    private static String deleteStatement = "DELETE FROM operations WHERE id = ?";
     ObjectMapper objectMapper = SingleObjectMapper.getInstance();
+    ConnectionPool pool;
+
+    {
+        try {
+            pool = ConnectionPool.create(url);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * Метод реализует подключение к базе данных и получение объекта по id
@@ -24,8 +39,9 @@ public class OperationDaoDB implements Dao {
      */
     @Override
     public Operation get(int id) {
-        try (Connection conn = new JDBC().getConnection()) {
-            PreparedStatement stmt = conn.prepareStatement("SELECT * FROM operations WHERE id = ?");
+        try {
+            Connection conn = pool.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(getStatement);
             stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
             JSONObject json = null;
@@ -33,7 +49,17 @@ public class OperationDaoDB implements Dao {
             if (rs.next()) {
                 json = convert(rs);
             }
+
+            if(rs != null)
+                rs.close();
+            if(stmt != null)
+                stmt.close();
+
+            // rs.close();
+            // stmt.close();
+            pool.releaseConnection(conn);
             System.out.println(json.toString());
+            System.out.println(pool.getSize());
             Operation operation = objectMapper.readValue(json.toString(), Operation.class);
             return operation;
         } catch (SQLException | JSONException e) {
@@ -55,8 +81,9 @@ public class OperationDaoDB implements Dao {
      */
     @Override
     public Collection getAll() {
-        try (Connection conn = new JDBC().getConnection()) {
-            PreparedStatement stmt = conn.prepareStatement("SELECT * FROM operations");
+        try {
+            Connection conn = pool.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(getAllStatement);
             ResultSet rs = stmt.executeQuery();
             JSONArray jsonArray = new JSONArray();
 
@@ -64,6 +91,13 @@ public class OperationDaoDB implements Dao {
                 JSONObject json = convert(rs);
                 jsonArray.put(json);
             }
+
+            if(rs != null)
+                rs.close();
+            if(stmt != null)
+                stmt.close();
+
+            pool.releaseConnection(conn);
             System.out.println(jsonArray.toString());
             Operation[] operation = objectMapper.readValue(jsonArray.toString(), Operation[].class);
             return Arrays.asList(operation);
@@ -84,23 +118,24 @@ public class OperationDaoDB implements Dao {
      */
     @Override
     public boolean add(Operation t) {
-        try (Connection conn = new JDBC().getConnection()) {
-            String sql = "INSERT INTO Operations(id, comment, dt_operation, oper_1, oper_2, operation, result) VALUES(?, ?, ?, ?, ?, ?, ?)";
-            PreparedStatement pstmt = null;
-            try {
-                pstmt = conn.prepareStatement(sql);
-                pstmt.setInt(1, t.getId());
-                pstmt.setString(2, t.getComment());
-                pstmt.setString(3, String.valueOf(t.getDt_operation()));
-                pstmt.setInt(4, t.getOper_1());
-                pstmt.setInt(5, t.getOper_2());
-                pstmt.setString(6, t.getOperation());
-                pstmt.setInt(7, t.getResult());
-                pstmt.executeUpdate();
-                return true;
-            } catch (SQLException e) {
-                return false;
-            }
+        PreparedStatement stmt = null;
+        try {
+            Connection conn = pool.getConnection();
+            stmt = conn.prepareStatement(addStatement);
+            stmt.setInt(1, t.getId());
+            stmt.setString(2, t.getComment());
+            stmt.setString(3, String.valueOf(t.getDt_operation()));
+            stmt.setInt(4, t.getOper_1());
+            stmt.setInt(5, t.getOper_2());
+            stmt.setString(6, t.getOperation());
+            stmt.setInt(7, t.getResult());
+            stmt.executeUpdate();
+
+            if(stmt != null)
+                stmt.close();
+
+            pool.releaseConnection(conn);
+            return true;
         } catch (SQLException e) {
             return false;
         }
@@ -114,13 +149,18 @@ public class OperationDaoDB implements Dao {
      */
     @Override
     public boolean update(int id, String comment) {
-        try (Connection conn = new JDBC().getConnection()) {
-            String sql = "UPDATE operations SET comment = ? WHERE id = ?";
+        try {
+            Connection conn = pool.getConnection();
 
-            PreparedStatement stmt = conn.prepareStatement(sql);
+            PreparedStatement stmt = conn.prepareStatement(updateStatement);
             stmt.setString(1, comment);
             stmt.setInt(2, id);
             stmt.executeUpdate();
+
+            if(stmt != null)
+                stmt.close();
+
+            pool.releaseConnection(conn);
             return true;
         } catch (SQLException e) {
             return false;
@@ -134,12 +174,17 @@ public class OperationDaoDB implements Dao {
      */
     @Override
     public boolean delete(int id) {
-        try (Connection conn = new JDBC().getConnection()) {
-            String sql = "DELETE FROM operations WHERE id = ?";
+        try {
+            Connection conn = pool.getConnection();
 
-            PreparedStatement stmt = conn.prepareStatement(sql);
+            PreparedStatement stmt = conn.prepareStatement(deleteStatement);
             stmt.setInt(1, id);
             stmt.executeUpdate();
+
+            if(stmt != null)
+                stmt.close();
+
+            pool.releaseConnection(conn);
             return true;
         } catch (SQLException e) {
             return false;

@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.sql.SQLException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
@@ -21,6 +22,16 @@ public class OperationServlet extends HttpServlet {
     private static Service service = new OperationService();
     ObjectMapper objectMapper = SingleObjectMapper.getInstance();
 
+    @Override
+    public void destroy() {
+        try {
+            ConnectionPool.shutdown();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        super.destroy();
+    }
+
     /**
      * Метод вызывается при обращении к url: /operations и возвращает объект (объекты) класса Operation
      *
@@ -28,6 +39,7 @@ public class OperationServlet extends HttpServlet {
      * @param response - ответ отправляемый из метода
      * throws IOException
      */
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         // Задание формата вывода
