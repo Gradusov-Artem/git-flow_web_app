@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Реализует интерфейс Service
  */
 public class OperationService implements Service {
-    private final AtomicInteger id = new AtomicInteger(5);
+    private final AtomicInteger id = new AtomicInteger(0);
     private Dao<Operation> operationDao = SingleOperationDao.getInstance();
 
     /**

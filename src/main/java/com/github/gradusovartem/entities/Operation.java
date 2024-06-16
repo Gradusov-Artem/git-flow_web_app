@@ -1,6 +1,8 @@
 package com.github.gradusovartem.entities;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * class Operation - содержит составляющие операции
@@ -14,6 +16,8 @@ public class Operation {
     private String operation;
     private int result;
 
+    final static DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ofPattern ( "M/d/yy H:mm" );
+
     public Operation(){
 
     }
@@ -24,7 +28,7 @@ public class Operation {
     public Operation(Operation data) {
         this.id = data.getId();
         this.comment = data.getComment();
-        this.dt_operation = LocalDateTime.now();
+        this.dt_operation = LocalDateTime.parse(LocalDateTime.now().format(ISO_FORMATTER), ISO_FORMATTER);
         this.oper_1 = data.getOper_1();
         this.oper_2 = data.getOper_2();
         this.operation = data.getOperation();
@@ -117,7 +121,34 @@ public class Operation {
     public void setOperation(String operation) {
         this.operation = operation;
     }
+    public void setDt_operation(LocalDateTime dt_operation) {
+        this.dt_operation = dt_operation;
+    }
     public void setResult(int result) {
         this.result = result;
+    }
+
+    public void setMethod(int i, Object o) {
+        if (i == 1) {
+            setId((Integer) o);
+        }
+        else if (i == 2) {
+            setComment((String) o);
+        }
+        else if (i == 3) {
+            setDt_operation((LocalDateTime) o);
+        }
+        else if (i == 4) {
+            setOper_1((Integer) o);
+        }
+        else if (i == 5) {
+            setOper_2((Integer) o);
+        }
+        else if (i == 6) {
+            setOperation((String) o);
+        }
+        else if (i == 7) {
+            setResult((Integer) o);
+        }
     }
 }

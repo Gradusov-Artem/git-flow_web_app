@@ -1,5 +1,6 @@
 package com.github.gradusovartem.entities;
 
+import java.sql.SQLException;
 import java.util.Collection;
 
 /**
