@@ -21,7 +21,7 @@ public class OperationDaoDB implements Dao {
     private static final String url = "jdbc:postgresql://localhost:5432/OperationDB?user=postgres&password=7719150Artik";
     private static String getStatement = "SELECT * FROM operations1 WHERE id = ?";
     private static String getAllStatement = "SELECT * FROM operations1";
-    private static String addStatement = "INSERT INTO operations1(id, comment, dt_operation, oper_1, oper_2, operation, result) VALUES(?, ?, ?, ?, ?, ?, ?)";
+    private static String addStatement = "INSERT INTO operations1(comment, dt_operation, oper_1, oper_2, operation, result) VALUES(?, ?, ?, ?, ?, ?)";
     private static String updateStatement = "UPDATE operations1 SET comment = ? WHERE id = ?";
     private static String deleteStatement = "DELETE FROM operations1 WHERE id = ?";
     ObjectMapper objectMapper = SingleObjectMapper.getInstance();
@@ -44,9 +44,10 @@ public class OperationDaoDB implements Dao {
     public Operation get(int id) {
         Connection conn = pool.getConnection();
 
-        if(1 == 1){
+        /* if(1 == 1){
+            System.out.println("TEST");
             throw new RuntimeException("TEST");
-        }
+        } */
         try {
             conn.setAutoCommit(false);
             PreparedStatement stmt = conn.prepareStatement(getStatement);
@@ -67,26 +68,20 @@ public class OperationDaoDB implements Dao {
 
             // rs.close();
             // stmt.close();
-            pool.releaseConnection(conn);
             // System.out.println(json.toString());
             System.out.println(pool.getSize());
             // Operation operation = objectMapper.readValue(json.toString(), Operation.class);
             conn.commit();
             return operation;
-        } catch (SQLException | JSONException e) {
+        } catch (SQLException | JSONException | NullPointerException e) {
             try {
                 conn.rollback();
             } catch (SQLException ex) {
                 throw new RuntimeException(ex);
             }
             e.printStackTrace();
-        } catch (NullPointerException e) {
-            try {
-                conn.rollback();
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
-            }
-            return null;
+        } finally {
+            pool.releaseConnection(conn);
         }
 
         return null;
@@ -127,8 +122,6 @@ public class OperationDaoDB implements Dao {
                 rs.close();
             if(stmt != null)
                 stmt.close();
-
-            pool.releaseConnection(conn);
             // System.out.println(jsonArray.toString());
             // Operation[] operation = objectMapper.readValue(jsonArray.toString(), Operation[].class);
             return Arrays.asList(operations);
@@ -139,6 +132,8 @@ public class OperationDaoDB implements Dao {
                 throw new RuntimeException(ex);
             }
             e.printStackTrace();
+        } finally {
+            pool.releaseConnection(conn);
         }
         return null;
     }
@@ -152,23 +147,34 @@ public class OperationDaoDB implements Dao {
     public boolean add(Operation t) {
         PreparedStatement stmt = null;
         Connection conn = pool.getConnection();
+        ResultSet rs = null;
         try {
             conn.setAutoCommit(false);
-            stmt = conn.prepareStatement(addStatement);
-            stmt.setInt(1, t.getId());
-            stmt.setString(2, t.getComment());
-            stmt.setObject(3, t.getDt_operation());
-            stmt.setInt(4, t.getOper_1());
-            stmt.setInt(5, t.getOper_2());
-            stmt.setString(6, t.getOperation());
-            stmt.setInt(7, t.getResult());
+            stmt = conn.prepareStatement(addStatement, PreparedStatement.RETURN_GENERATED_KEYS);
+            // stmt.setInt(1, t.getId());
+            stmt.setString(1, t.getComment());
+            stmt.setObject(2, t.getDt_operation());
+            stmt.setInt(3, t.getOper_1());
+            stmt.setInt(4, t.getOper_2());
+            stmt.setString(5, t.getOperation());
+            stmt.setInt(6, t.getResult());
             stmt.executeUpdate();
             conn.commit();
 
+            rs = stmt.getGeneratedKeys();
+            int id = 0;
+            if (rs.next()) {
+                id = rs.getInt(1);
+                System.out.println("ID последней вставленной записи: " + id);
+            }
+            if (id == 0) {
+                throw new IllegalArgumentException("CAN'T GET GENERATED KEYS");
+            }
+            t.setId(id);
+            if(rs != null)
+                rs.close();
             if(stmt != null)
                 stmt.close();
-
-            pool.releaseConnection(conn);
             return true;
         } catch (SQLException e) {
             try {
@@ -177,6 +183,8 @@ public class OperationDaoDB implements Dao {
                 throw new RuntimeException(ex);
             }
             return false;
+        } finally {
+            pool.releaseConnection(conn);
         }
     }
 
@@ -200,7 +208,6 @@ public class OperationDaoDB implements Dao {
             if(stmt != null)
                 stmt.close();
 
-            pool.releaseConnection(conn);
             return true;
         } catch (SQLException e) {
             try {
@@ -209,6 +216,8 @@ public class OperationDaoDB implements Dao {
                 throw new RuntimeException(ex);
             }
             return false;
+        } finally {
+            pool.releaseConnection(conn);
         }
     }
 
@@ -230,7 +239,6 @@ public class OperationDaoDB implements Dao {
             if(stmt != null)
                 stmt.close();
 
-            pool.releaseConnection(conn);
             return true;
         } catch (SQLException e) {
             try {
@@ -239,6 +247,8 @@ public class OperationDaoDB implements Dao {
                 throw new RuntimeException(ex);
             }
             return false;
+        } finally {
+            pool.releaseConnection(conn);
         }
     }
 
@@ -273,8 +283,14 @@ public class OperationDaoDB implements Dao {
         int numColumns = rsmd.getColumnCount();
         Operation operation = new Operation();
         operation.setId(rs.getInt("id"));
+        operation.setComment(rs.getString("comment"));
+        operation.setDt_operation(LocalDateTime.parse(String.valueOf(rs.getObject("dt_operation")).replaceAll("\\s", "T")));
+        operation.setOper_1(rs.getInt("oper_1"));
+        operation.setOper_2(rs.getInt("oper_2"));
+        operation.setOperation(rs.getString("operation"));
+        operation.setResult(rs.getInt("result"));
 
-        for (int i = 1; i < numColumns + 1; i++) {
+        /* for (int i = 1; i < numColumns + 1; i++) {
             String column_name = rsmd.getColumnName(i);
 
             if (rsmd.getColumnType(i) == java.sql.Types.INTEGER) {
@@ -287,7 +303,7 @@ public class OperationDaoDB implements Dao {
                 // obj.put(column_name, LocalDateTime.parse(String.valueOf(rs.getObject(column_name)).replaceAll("\\s", "T")));
                 operation.setMethod(i, LocalDateTime.parse(String.valueOf(rs.getObject(column_name)).replaceAll("\\s", "T")));
             }
-        }
+        } */
         return operation;
     }
 }
