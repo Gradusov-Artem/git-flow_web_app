@@ -54,12 +54,12 @@ public class OperationService implements Service {
         }
 
         int result = calculation(operation);
-        int id_ = generateUniqueID();
-        operation.setId(id_);
+        // int id_ = generateUniqueID();
+        // operation.setId(id_);
         operation.setResult(result);
         Operation currentOperation = new Operation(operation);
         if (operationDao.add(currentOperation)) {
-            currentOperation = operationDao.get(id_);
+            currentOperation = operationDao.get(currentOperation.getId());
             return currentOperation;
         }
         return null;
